@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[32]:
+# In[1]:
 
 
 import cv2 as cv
 import matplotlib.pyplot as plt
 
 
-# In[34]:
+# In[2]:
 
 
 net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
 
 
-# In[36]:
+# In[3]:
 
 
 inWidth = 368
@@ -22,7 +22,7 @@ inHeight = 368
 thr = 0.2
 
 
-# In[38]:
+# In[4]:
 
 
 BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
@@ -37,25 +37,25 @@ POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElb
                ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
 
-# In[40]:
+# In[5]:
 
 
 img = cv.imread("pose1.jpg")
 
 
-# In[42]:
+# In[6]:
 
 
 plt.imshow(img)
 
 
-# In[44]:
+# In[7]:
 
 
 plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
 
 
-# In[46]:
+# In[8]:
 
 
 #255/2 = 127.5
@@ -64,7 +64,7 @@ def pose_estimation(frame):
     frameHeight = frame.shape[0]
     net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
     out = net.forward()
-    out = out[:, :19, :, :] 
+    out = out[:, :19, :, :]
 
     assert(len(BODY_PARTS) == out.shape[1])
 
@@ -73,7 +73,7 @@ def pose_estimation(frame):
     for i in range(len(BODY_PARTS)):
         heatMap = out[0, i, :, :]
         _, conf, _, point = cv.minMaxLoc(heatMap)
-        #print(f"Body part {i}: Confidence = {conf}, Point = {point}")
+        print(f"Body part {i}: Confidence = {conf}, Point = {point}")
         x = (frameWidth * point[0]) / out.shape[3]
         y = (frameHeight * point[1]) / out.shape[2]
 
@@ -100,25 +100,32 @@ def pose_estimation(frame):
     return frame
 
 
-# In[48]:
+# In[9]:
 
 
 estimated_image = pose_estimation(img)
 
 
-# In[50]:
+# In[10]:
 
 
-plt.imshow(cv.cvtColor(estimated_image, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
 
 
-# In[52]:
+# In[11]:
+
+
+#Video
+
+
+# In[12]:
 
 
 #perform this demo on video
+#from google.colab.patches import cv2_imshow
 cap = cv.VideoCapture('pose_estimation_video.mp4')
-cap.set(3,800)
-cap.set(4,800)
+cap.set(3,800) #height
+cap.set(4,800) #width
 
 if not cap.isOpened():
     cap = cv.VideoCapture(0)
@@ -130,11 +137,12 @@ while cv.waitKey(1) < 0:
     if not hasFrame:
         cv.waitKey()
         break
+        
     frameWidth = frame.shape[1]
     frameHeight = frame.shape[0]
     net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
     out = net.forward()
-    out = out[:, :19, :, :] 
+    out = out[:, :19, :, :]
 
     assert(len(BODY_PARTS) == out.shape[1])
 
@@ -143,7 +151,7 @@ while cv.waitKey(1) < 0:
     for i in range(len(BODY_PARTS)):
         heatMap = out[0, i, :, :]
         _, conf, _, point = cv.minMaxLoc(heatMap)
-        #print(f"Body part {i}: Confidence = {conf}, Point = {point}")
+        print(f"Body part {i}: Confidence = {conf}, Point = {point}")
         x = (frameWidth * point[0]) / out.shape[3]
         y = (frameHeight * point[1]) / out.shape[2]
 
@@ -168,17 +176,20 @@ while cv.waitKey(1) < 0:
     freq = cv.getTickFrequency() / 1000
     cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    cv.imshow('Pose estimation Tutorial ', frame)
+    cv.imshow('Pose Estimation Tutorial', frame)
+    
+        
 
 
-# In[55]:
+# In[14]:
 
 
-#Webcam
+#camera
+#perform this demo on video
+#from google.colab.patches import cv2_imshow
 cap = cv.VideoCapture(1)
-cap.set(cv.CAP_PROP_FPS, 10)
-cap.set(3,800)
-cap.set(4,800)
+cap.set(3,800) #height
+cap.set(4,800) #width
 
 if not cap.isOpened():
     cap = cv.VideoCapture(0)
@@ -190,11 +201,12 @@ while cv.waitKey(1) < 0:
     if not hasFrame:
         cv.waitKey()
         break
+        
     frameWidth = frame.shape[1]
     frameHeight = frame.shape[0]
     net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
     out = net.forward()
-    out = out[:, :19, :, :] 
+    out = out[:, :19, :, :]
 
     assert(len(BODY_PARTS) == out.shape[1])
 
@@ -203,7 +215,7 @@ while cv.waitKey(1) < 0:
     for i in range(len(BODY_PARTS)):
         heatMap = out[0, i, :, :]
         _, conf, _, point = cv.minMaxLoc(heatMap)
-        #print(f"Body part {i}: Confidence = {conf}, Point = {point}")
+        print(f"Body part {i}: Confidence = {conf}, Point = {point}")
         x = (frameWidth * point[0]) / out.shape[3]
         y = (frameHeight * point[1]) / out.shape[2]
 
@@ -228,11 +240,5 @@ while cv.waitKey(1) < 0:
     freq = cv.getTickFrequency() / 1000
     cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    cv.imshow('Pose estimation Tutorial ', frame)
-
-
-# In[ ]:
-
-
-
-
+    cv.imshow('Pose Estimation Tutorial', frame)
+    
